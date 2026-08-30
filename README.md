@@ -66,16 +66,19 @@ User → SpeakWise → FastAPI → Gemini
                          → Memory
                          → Mistake Tracking
                          → SQLite
-Voice Architecture
+ ### Voice Architecture
 User → SpeakWise Voice Mode → FastAPI → Retell API → Temporary Token → Retell Web SDK → Voice Conversation
-Complete Learning Flow
-User → SpeakWise → Learner Context → Memory + RAG + Mistakes → Gemini → Personalized Response → Learner
-🔄 Chat Flow
-User → SpeakWise → Learner Context → Memory → RAG → Gemini → Personalized Response → Learner
-🎙️ Voice Flow
-User → Voice Mode → FastAPI → Retell API → Temporary Access Token → Retell Web SDK → AI Voice Conversation
-🧠 Learning System
 
+### Complete Learning Flow
+User → SpeakWise → Learner Context → Memory + RAG + Mistakes → Gemini → Personalized Response → Learner
+
+### 🔄 Chat Flow
+User → SpeakWise → Learner Context → Memory → RAG → Gemini → Personalized Response → Learner
+
+### 🎙️ Voice Flow
+User → Voice Mode → FastAPI → Retell API → Temporary Access Token → Retell Web SDK → AI Voice Conversation
+
+### 🧠 Learning System
 SpeakWise combines multiple components to create a personalized learning experience.
 
 Learner → Conversation → Memory
