@@ -39,32 +39,6 @@ The system records English mistakes made during interactions.
 
 The stored mistakes can be used to identify recurring problems and support personalized learning.
 
-speakwise-ai/
-│
-├── backend/ 
-│   ├── main.py
-│   ├── agent.py
-│   ├── config.py
-│   ├── retell.py
-│   └── ...
-│
-├── frontend/
-│   ├── index.html
-│   ├── app.js
-│   ├── style.css
-│   │
-│   ├── services/
-│   │   └── retell-voice.js
-│   │
-│   └── components/
-│       └── voice-orb.js
-│
-├── database/
-│   └── teacher.db
-│
-├── requirements.txt
-├── .gitignore
-└── README.md
 
 Installation
 1. Clone the repository
@@ -86,19 +60,26 @@ Start the backend:
 
 uvicorn backend.main:app --reload
 
-Chat Flow
-User
- ↓
-SpeakWise
- ↓
-Learner Context
- ↓
-Memory + Mistakes
- ↓
-RAG Retrieval
- ↓
-Gemini
- ↓
-Personalized Response
- ↓
-Learner
+System Architecture
+User → SpeakWise → FastAPI → Gemini
+                         → RAG
+                         → Memory
+                         → Mistake Tracking
+                         → SQLite
+Voice Architecture
+User → SpeakWise Voice Mode → FastAPI → Retell API → Temporary Token → Retell Web SDK → Voice Conversation
+Complete Learning Flow
+User → SpeakWise → Learner Context → Memory + RAG + Mistakes → Gemini → Personalized Response → Learner
+🔄 Chat Flow
+User → SpeakWise → Learner Context → Memory → RAG → Gemini → Personalized Response → Learner
+🎙️ Voice Flow
+User → Voice Mode → FastAPI → Retell API → Temporary Access Token → Retell Web SDK → AI Voice Conversation
+🧠 Learning System
+
+SpeakWise combines multiple components to create a personalized learning experience.
+
+Learner → Conversation → Memory
+                    → Mistake Tracking
+                    → RAG
+                    → Gemini
+                    → Personalized Learning
