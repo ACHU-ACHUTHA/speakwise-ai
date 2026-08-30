@@ -60,14 +60,12 @@ Start the backend:
 
 uvicorn backend.main:app --reload
 
-System Architecture
+### System Architecture
 User → SpeakWise → FastAPI → Gemini
                          → RAG
                          → Memory
                          → Mistake Tracking
                          → SQLite
- ### Voice Architecture
-User → SpeakWise Voice Mode → FastAPI → Retell API → Temporary Token → Retell Web SDK → Voice Conversation
 
 ### Complete Learning Flow
 User → SpeakWise → Learner Context → Memory + RAG + Mistakes → Gemini → Personalized Response → Learner
