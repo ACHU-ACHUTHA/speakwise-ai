@@ -66,7 +66,7 @@ speakwise-ai/
 ├── .gitignore
 └── README.md
 
-<h2>Installation<h2/>
+Installation
 1. Clone the repository
 git clone https://github.com/ACHU-ACHUTHA/speakwise-ai.git
 cd speakwise-ai
