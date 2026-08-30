@@ -1,56 +1,31 @@
-import sqlite3
-from datetime import datetime
+from langchain_core.tools import tool
+from backend.memory import (
+    save_mistake_db,
+    save_learner_profile_db,
+    get_learner_profile_db
+)
 
-
-DB_PATH = "database/teacher.db"
-
-
-def save_mistake(
-    original: str,
-    correction: str,
-    category: str
-):
+@tool
+def save_mistake(original: str, correction: str, category: str = "grammar") -> str:
     """
     Save an English mistake made by the student.
+    Use this only for important or repeated English mistakes (e.g. subject-verb agreement, tense errors).
+    Do NOT call this for casual texting style, missing capitalization, or minor typos.
     """
+    return save_mistake_db(original=original, correction=correction, category=category)
 
-    connection = sqlite3.connect(DB_PATH)
+@tool
+def save_learner_profile(name: str = None, english_level: str = None, goal: str = None) -> str:
+    """
+    Save or update the student's learner profile when they explicitly share their name, English level, or learning goals.
+    Example: 'My name is Achu and I want to improve my spoken English.'
+    """
+    return save_learner_profile_db(name=name, english_level=english_level, goal=goal)
 
-    cursor = connection.cursor()
-
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS mistakes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            original TEXT NOT NULL,
-            correction TEXT NOT NULL,
-            category TEXT,
-            created_at TEXT NOT NULL
-        )
-    """)
-
-    cursor.execute("""
-        INSERT INTO mistakes
-        (original, correction, category, created_at)
-        VALUES (?, ?, ?, ?)
-    """, (
-        original,
-        correction,
-        category,
-        datetime.now().isoformat()
-    ))
-
-    connection.commit()
-    connection.close()
-
-    return "Mistake saved successfully."
-
-# =====================
-if __name__ == "__main__":
-
-    result = save_mistake(
-        "I didn't ate breakfast",
-        "I didn't eat breakfast",
-        "grammar"
-    )
-
-    print(result)
+@tool
+def get_learner_profile() -> dict:
+    """
+    Retrieve the student's saved profile (name, English level, learning goals).
+    Use this when knowing the student's saved details helps answer their question or personalize feedback.
+    """
+    return get_learner_profile_db()

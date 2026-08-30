@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpeakWise AI — English Teacher</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script type="module">
+        import { RetellWebClient } from 'https://cdn.jsdelivr.net/npm/retell-client-js-sdk@2.0.8/dist/index.mjs';
+        window.RetellWebClient = RetellWebClient;
+        console.log('[SDK DEBUG] RetellWebClient imported via ES module');
+        console.log('[SDK DEBUG] window.RetellWebClient:', typeof window.RetellWebClient);
+    </script>
+    <script>
+        console.log('[SDK DEBUG] Retell SDK script loaded');
+        console.log('[SDK DEBUG] window.RetellWebClient:', typeof window.RetellWebClient);
+        console.log('[SDK DEBUG] window.retellSDK:', typeof window.retellSDK);
+        console.log('[SDK DEBUG] window.Retell:', typeof window.Retell);
+        console.log('[SDK DEBUG] window.retell:', typeof window.retell);
+        console.log('[SDK DEBUG] Available Retell globals:', Object.keys(window).filter(k => k.toLowerCase().includes('retell')));
+        
+        // Try to find the actual global variable
+        if (typeof window.RetellWebClient === 'undefined') {
+            console.log('[SDK DEBUG] RetellWebClient not found, checking other possibilities...');
+            const retellKeys = Object.keys(window).filter(k => k.toLowerCase().includes('retell'));
+            console.log('[SDK DEBUG] Retell-related keys:', retellKeys);
+            retellKeys.forEach(key => {
+                console.log(`[SDK DEBUG] window.${key}:`, typeof window[key]);
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation / Profile -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-graduation-cap logo-icon"></i>
+                <h2>SpeakWise AI</h2>
+            </div>
+            <div class="card profile-card">
+                <h3><i class="fa-solid fa-user-astronaut"></i> Learner Profile</h3>
+                <div id="profile-content">
+                    <p><strong>Name:</strong> <span id="prof-name">Loading...</span></p>
+                    <p><strong>Level:</strong> <span id="prof-level">Loading...</span></p>
+                    <p><strong>Goal:</strong> <span id="prof-goal">Loading...</span></p>
+                </div>
+            </div>
+
+            <div class="card mistakes-card">
+                <h3><i class="fa-solid fa-book-bookmark"></i> Recent Mistakes Log</h3>
+                <ul id="mistakes-list">
+                    <li>No mistakes recorded yet.</li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Chat & Voice Area -->
+        <main class="chat-area" id="chat-area">
+            <header class="chat-header">
+                <div>
+                    <h2>🧑‍🏫 Teacher SpeakWise</h2>
+                    <p class="subtitle">Practice conversational English naturally via voice or text.</p>
+                </div>
+                <div class="header-actions">
+                    <button id="voice-mode-btn" class="mode-btn" title="Switch to Voice Mode">
+                        <i class="fa-solid fa-microphone"></i> Voice Mode
+                    </button>
+                  <button id="refresh-memory-btn" title="Refresh Profile"><i class="fa-solid fa-rotate"></i> Sync Memory</button>
+                </div>
+            </header>
+
+            <div class="messages-container" id="messages">
+                <div class="message assistant-message">
+                    <div class="avatar"><i class="fa-solid fa-robot"></i></div>
+                    <div class="bubble">
+                        Hello! I am SpeakWise, your AI English teacher. How can I help you practice your English today?
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audio Player for Voice Output -->
+            <audio id="audio-player" style="display:none;"></audio>
+
+            <!-- Recording Status Bar (outside chat bubbles, above input) -->
+            <div id="recording-status" class="recording-status hidden">
+                <div class="waveform" id="waveform">
+                    <span class="waveform-bar"></span>
+                    <span class="waveform-bar"></span>
+                    <span class="waveform-bar"></span>
+                    <span class="waveform-bar"></span>
+                    <span class="waveform-bar"></span>
+                </div>
+                <span class="status-spinner hidden" id="status-spinner"></span>
+                <span id="recording-label">Listening...</span>
+            </div>
+
+            <!-- Input & Voice Chat Bar -->
+            <div class="input-bar">
+                <button id="mic-btn" class="mic-button" title="Start voice input">
+                    <i class="fa-solid fa-microphone"></i>
+                </button>
+                <input type="text" id="text-input" placeholder="Type a message..." />
+                <button id="send-btn" class="send-button">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </main>
+
+        <!-- Voice Mode Interface -->
+        <div class="voice-mode" id="voice-mode" style="display: none;">
+            <header class="voice-header">
+                <div class="voice-brand">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <h2>SpeakWise AI</h2>
+                </div>
+                <div class="mode-switcher">
+                    <button class="mode-switch-btn chat-mode-btn" id="chat-mode-btn">
+                        <i class="fa-solid fa-comment"></i> Chat Mode
+                    </button>
+                    <button class="mode-switch-btn voice-mode-btn active">
+                        <i class="fa-solid fa-microphone"></i> Voice Mode
+                    </button>
+                </div>
+                <button class="exit-voice-btn" id="exit-voice-btn">
+                    <i class="fa-solid fa-xmark"></i> End Voice Mode
+                </button>
+            </header>
+
+            <div class="voice-content">
+                <!-- AI Orb Section -->
+                <div class="orb-section">
+                    <div class="orb-container">
+                        <canvas id="orb-canvas"></canvas>
+                        <div class="orb-status" id="orb-status">
+                            <div class="status-icon" id="status-icon">
+                                <i class="fa-solid fa-microphone"></i>
+                            </div>
+                            <div class="status-text" id="status-text">Ready to listen</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Transcript Section -->
+                <div class="transcript-section">
+                    <div class="transcript-header">
+                        <h3><i class="fa-solid fa-scroll"></i> Live Transcript</h3>
+                        <div class="live-indicator">
+                            <span class="live-dot"></span>
+                            <span class="live-text">Live</span>
+                        </div>
+                    </div>
+                    <div class="transcript-container" id="transcript-container">
+                        <div class="transcript-empty">
+                            <i class="fa-solid fa-microphone-lines"></i>
+                            <p>Start speaking to see the live transcript</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voice Controls -->
+            <div class="voice-controls">
+                <div class="learner-mini-card">
+                    <div class="mini-profile">
+                        <i class="fa-solid fa-user-astronaut"></i>
+                        <div class="mini-info">
+                            <span class="mini-name" id="mini-name">Loading...</span>
+                            <span class="mini-level" id="mini-level">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-buttons">
+                    <button class="control-btn main-btn" id="voice-main-btn" title="Start voice session">
+                        <i class="fa-solid fa-microphone"></i>
+                        <span class="btn-text">Start</span>
+                    </button>
+                    <button class="control-btn secondary-btn" id="stop-btn" title="Stop voice session">
+                        <i class="fa-solid fa-stop"></i>
+                    </button>
+                </div>
+
+                <div class="control-settings">
+                    <button class="settings-btn" title="Settings">
+                        <i class="fa-solid fa-gear"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="services/retell-voice.js"></script>
+    <script src="components/voice-orb.js"></script>
+    <script src="app.js"></script>
+    <script>
+        console.log('[HTML DEBUG] Retell integration loaded');
+        console.log('[HTML DEBUG] RetellWebClient:', typeof RetellWebClient);
+        console.log('[HTML DEBUG] retellSDK:', typeof retellSDK);
+        console.log('[HTML DEBUG] Retell:', typeof Retell);
+        console.log('[HTML DEBUG] RetellVoiceManager:', typeof RetellVoiceManager);
+        console.log('[HTML DEBUG] VoiceOrb:', typeof VoiceOrb);
+        console.log('[HTML DEBUG] Available Retell globals:', Object.keys(window).filter(k => k.toLowerCase().includes('retell')));
+    </script>
+</body>
+</html>
