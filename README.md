@@ -41,7 +41,7 @@ The stored mistakes can be used to identify recurring problems and support perso
 
 speakwise-ai/
 │
-├── backend/ /n
+├── backend/ 
 │   ├── main.py
 │   ├── agent.py
 │   ├── config.py
@@ -85,3 +85,20 @@ Run the Application
 Start the backend:
 
 uvicorn backend.main:app --reload
+
+Chat Flow
+User
+ ↓
+SpeakWise
+ ↓
+Learner Context
+ ↓
+Memory + Mistakes
+ ↓
+RAG Retrieval
+ ↓
+Gemini
+ ↓
+Personalized Response
+ ↓
+Learner
