@@ -41,7 +41,7 @@ The stored mistakes can be used to identify recurring problems and support perso
 
 speakwise-ai/
 │
-├── backend/
+├── backend/ /n
 │   ├── main.py
 │   ├── agent.py
 │   ├── config.py
